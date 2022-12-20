@@ -87,8 +87,10 @@ const addEmployee =()=> {
             message: "Who is the employee's manager?",
             choices: ["John Doe", "Mike Chan", "Ashley Rodriguez", "Kevin Tupik", "Kunal", "Singh", "Malia Brown", "Sara Lourd", "Tom Allen",],
             type: "confirm",
-        }
-    ])
+        },
+    ]).then((res)=> {
+        const employee = new Employee(res.firstName, res.lastName, res.employee)
+    })
 };
 
 const addRole =()=> {
