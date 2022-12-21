@@ -11,21 +11,25 @@ const mysql = require('mysql2');
 const { appendFile } = require("fs");
 
 
-// const PORT = process.env.PORT || 3001;
-// const app = express();
+const PORT = process.env.PORT || 3001;
+const app = express();
 
-// //Express middleware
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
+//Express middleware
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-// const db = mysql.createConnection(
-//     {
-//         host: 'localhost',
-//         user: "root",
-//         passowrd: "root",
-//         database: "employee_db"
-//     }
-// )
+const routes = require('./routes');
+app.use('/api', routes);
+
+const db = mysql.createConnection(
+    {
+        host: 'localhost',
+        user: "root",
+        password: "root",
+        database: "employee_db",
+        port: "8889"
+    }
+)
 
 
 function menu(){
@@ -39,10 +43,10 @@ inquirer.prompt(
         "View All Roles", "Add Role",
         "View All Departments",
         "Add Department"],
-        type:"confirm",
+        type:"list",
     }
-).then(function(){
-    switch(choice){
+).then(function({choices}){
+    switch(choices){
         case "View All Employees":
             viewAllEmployee();
         break;
@@ -71,24 +75,17 @@ inquirer.prompt(
 };
 
 const viewAllEmployee =()=>{
-    app.get('/api/employee', (req, res)=>{
-        const sql = `SELECT id, first_name, last_name, department_id, role_id, manager_id AS title FROM employee`;
-
-        db.query(sql,(err, rows)=>{
-            if(err){
-                res.status(500).json({ error: err.message});
-                return;
-            }
-            res.json({
-                message: 'success',
-                data: rows
-            });
-        });
-    });
+    fetch("http://localhost:3001/api/employee").then(()=>{
+        menu()
+    }).catch(err =>{
+        console.log(err);
+    })
+    
+    
 }
 
 const addEmployee =()=> {
-    inquirer.promp([
+    inquirer.prompt([
         {
             name:"firstName",
             message: "What is the employee's first name?",
@@ -103,13 +100,13 @@ const addEmployee =()=> {
             name:"employeeRole",
             message: "What is the employee's role?",
             choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software engineer", "Account manager", "Account", "Legal Team Lead", "Lawyer"],
-            type: "confirm",
+            type: "list",
         },
         {
             name:"employeeManager",
             message: "Who is the employee's manager?",
             choices: ["John Doe", "Mike Chan", "Ashley Rodriguez"],
-            type: "confirm",
+            type: "list",
         },
     ]).then((res)=> {
         const employee = new Employee(res.firstName, res.lastName, res.employee, res.employeeRole, 
@@ -119,26 +116,7 @@ const addEmployee =()=> {
 };
 
 const updateEmployee =()=>{
-    app.put('api/employee/:id', (req, res) => {
-        const sql = `UPDATE employee SET role = ? WHERE id = ? `;
-        const params = [req.body.role_id, re.params.id];
-
-        db.query(sql, params, (err, result) =>{
-            if (err){
-                res.status(400).json({ error: err.message});
-            }else if (!result.affectedRows) {
-                res.json({
-                    message: "Employee not found"
-                });
-            }else {
-                res.json({
-                    message: "Success",
-                    data: req.body,
-                    changes: result.affectedRows
-                });
-            }
-        });
-    });
+    fetch ("http://localhost:3001/api/employee/:id");
 }
 
 const addRole =()=> {
@@ -157,7 +135,7 @@ const addRole =()=> {
             name:"roleDepartment",
             message: "Which department does the role belong to?",
             choices: ["Engineering", "Finance", "Legal", "Sales", "Service"],
-            type: "confirm",
+            type: "list",
         }
     ])
     then((res)=> {
@@ -177,7 +155,8 @@ const addDepartment =()=> {
     })
 }
 
-// app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-//   });
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    menu();
+  });
 
