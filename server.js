@@ -2,6 +2,7 @@ const Department  = require("./lib/department");
 const Employee = require("./lib/employee")
 const Role = require("./lib/role")
 const path = require ('path');
+const {fetch} = require ('undici');
 
 const inquirer = require('inquirer');
 const express = require ('express');
@@ -76,6 +77,7 @@ inquirer.prompt(
 
 const viewAllEmployee =()=>{
     fetch("http://localhost:3001/api/employee").then(()=>{
+        console.log('test');
         menu()
     }).catch(err =>{
         console.log(err);
@@ -119,6 +121,14 @@ const updateEmployee =()=>{
     fetch ("http://localhost:3001/api/employee/:id");
 }
 
+const viewallRoles =()=>{
+    fetch("http://localhost:3001/api/role").then(()=>{
+        menu()
+    }).catch(err =>{
+        console.log(err);
+    })
+}
+
 const addRole =()=> {
     inquirer.prompt([
         {
@@ -137,12 +147,19 @@ const addRole =()=> {
             choices: ["Engineering", "Finance", "Legal", "Sales", "Service"],
             type: "list",
         }
-    ])
-    then((res)=> {
+    ]).then((res)=> {
         const role = new Role (res.roleName, res.roleSalary, res.roleDepartment);
             menu();
     })
 };
+
+const viewAllDepartments =()=>{
+    fetch("http://localhost:3001/api/department").then(()=>{
+        menu()
+    }).catch(err =>{
+        console.log(err);
+    })
+}
 
 const addDepartment =()=> {
     inquirer.prompt({
