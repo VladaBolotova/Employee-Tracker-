@@ -79,13 +79,21 @@ mysql2
 undici
 */
     
-const viewAllEmployee = async () => {
+const viewAllEmployee =  () => {
 
-    return await db.query( `SELECT * FROM employee`, function (err, result) {
-            if(!err) throw err;     
-            console.table(result);
-            menu()
-      });
+     db.promise().query( `SELECT employee.id, employee.first_name, employee.last_name, role.title , role.salary, department.name, CONCAT(manager.first_name, ' ', manager.last_name) AS manager_name
+     FROM employee 
+     LEFT JOIN role ON employee.role_id = role.id 
+     JOIN department ON role.department_id = department.id
+     LEFT JOIN employee AS manager ON employee.manager_id = manager.id;` ).then((result) => {
+       console.table(result[0]);   
+        menu()
+     }).catch( (err) => {
+    throw err;
+     });
+        
+          
+     
     }
 
 const viewAllDepartments =()=>{
@@ -108,9 +116,8 @@ const viewAllDepartments =()=>{
     }
 
 const addEmployee = async () => {
-    console.info('adding employee...', employee)
     try {
-        const response = await inquirer.prompt(
+        const response = await inquirer.prompt([
             {
                 name: "firstName",
                 message: "What is the first name?",
@@ -131,10 +138,9 @@ const addEmployee = async () => {
                 message: "What is the role id?",
                 type: "input",
             }
-        );
-
+        ]);
         if (!response) {
-            console.error('error adding employee from prompts', responses);
+            console.error('error adding employee from prompts', response);
             process.exitCode = 1;
             process.exit();
         }
@@ -142,7 +148,7 @@ const addEmployee = async () => {
         if (response) {
             console.log('add employee prompts', response)
             // const employee = new Employee(response?.first_name, response?.last_name, response?.role_id, response?.manager_id)
-            const insert = await db.promise().query(`INSERT INTO employee ( first_name, last_name, role_id, manager_id) VALUES(?,?)`, ...response );
+            const insert = await db.promise().query(`INSERT INTO employee ( first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)`,[ response.firstName , response.lastName, response.roleId, response.managerId]);
 
             console.log(insert);
 
