@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
 const table = require("console.table"); 
-const Employee = require('./lib/employee');
+
 
 function menu(){
     inquirer.prompt(
@@ -73,13 +73,9 @@ function menu(){
         }
     })
     };
-    /* 
-    inquirer
-mysql2
-undici
-*/
+ 
     
-const viewAllEmployee =  () => {
+const viewAllEmployee = () => {
 
      db.promise().query( `SELECT employee.id, employee.first_name, employee.last_name, role.title , role.salary, department.name, CONCAT(manager.first_name, ' ', manager.last_name) AS manager_name
      FROM employee 
@@ -91,29 +87,28 @@ const viewAllEmployee =  () => {
      }).catch( (err) => {
     throw err;
      });
-        
-          
-     
     }
 
-const viewAllDepartments =()=>{
+const viewAllDepartments = () =>{
 
-    db.query( `SELECT * FROM department`, function (err, result) {
-            if(!err) throw err;     
-            console.table(result);
-            menu()
+    db.promise().query( `SELECT department.id, deprtment.name 
+    FROM department`).then((result) => {
+        console.table(result[0]);   
+         menu()
+      }).catch( (err) => {
+     throw err;
       });
     }
 
-    const viewAllRoles =()=>{
-        if (choices.prompt === 'View All Roles')
-
-      db.query( `SELECT * FROM role`, function (err, result) {
-            if(!err) throw err;     
-            console.table(result);
-            menu()
+const viewAllRoles =()=>{
+      
+      db.promise().query( `SELECT * FROM role` ). then((result) => {
+        console.table(result[0]);   
+         menu()
+      }).catch( (err) => {
+     throw err;
       });
-    }
+     }
 
 const addEmployee = async () => {
     try {
@@ -147,7 +142,6 @@ const addEmployee = async () => {
 
         if (response) {
             console.log('add employee prompts', response)
-            // const employee = new Employee(response?.first_name, response?.last_name, response?.role_id, response?.manager_id)
             const insert = await db.promise().query(`INSERT INTO employee ( first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)`,[ response.firstName , response.lastName, response.roleId, response.managerId]);
 
             console.log(insert);
@@ -173,12 +167,10 @@ const addEmployee = async () => {
        
     }
     
-    const addRole =()=> {
-        if(choices.prompt === 'Add A Role'){
-            db.query(`SELECT * FROM`)
-        }
-
-        inquirer.prompt([
+    const addRole = async () => {
+        try {
+     
+        const response = await inquirer.prompt([
             {
                 name:"roleName",
                 message: "What is the name of the role?",
@@ -195,23 +187,73 @@ const addEmployee = async () => {
                 choices: ["Engineering", "Finance", "Legal", "Sales", "Service"],
                 type: "list",
             }
-        ]).then((res)=> {
-            const role = new Role (res.roleName, res.roleSalary, res.roleDepartment);
-            menu();
-        })
-    };
+        ]);
+        if (!response) {
+            console.error('error adding role from prompts', response);
+            process.exitCode = 1;
+            process.exit();
+        }
+
+        if (response) {
+            console.log('add role prompts', response)
+            const insert = await db.promise().query(`INSERT INTO role ( title, salary, department_id) VALUES(?,?,?)`,[ response.roleName , response.roleSalary, response.roleDepartment,]);
+
+            console.log(insert);
+
+            if(!insert) {
+                console.error('error adding role', insert);
+                process.exitCode = 1
+                process.exit()
+            }
+    
+                if(insert) menu();
+                console.table(result); 
+        }
+
+
+        }
+            catch(err) {
+                console.error(err)
+            }
+     }
     
  
     
-    const addDepartment =()=> {
-        inquirer.prompt({
+    const addDepartment = async () => {
+        try{
+        const response = await inquirer.prompt({
             name: "departmentName",
             message: "What is the name of the department?",
             type: "input",
-        }).then((res)=>{
-            const department = new Department(res.departmentName);
-            menu();
-        })
-    }
+        });
+        if (!response) {
+            console.error('error adding department from prompts', response);
+            process.exitCode = 1;
+            process.exit();
+        }
+
+        if (response) {
+            console.log('add department prompts', response)
+            const insert = await db.promise().query(`INSERT INTO department ( name) VALUES(?)`,[ response.departmentName]);
+
+            console.log(insert);
+
+            if(!insert) {
+                console.error('error adding department', insert);
+                process.exitCode = 1
+                process.exit()
+            }
+    
+                if(insert) menu();
+                console.table(result); 
+        }
+
+
+        }
+            catch(err) {
+                console.error(err)
+            }
+     }
+    
 
     menu();
