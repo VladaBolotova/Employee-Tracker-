@@ -52,19 +52,19 @@ function menu(){
             case "ADD_EMPLOYEE":
                 addEmployee();
             break;
-            case "Update Employee Role":
+            case "UPDATE_EMPLOYEE_ROLE":
                 updateEmployee();
             break;
-            case "View All Roles":
+            case "VIEW_ALL_ROLES":
                 viewAllRoles();
             break;
-            case "Add A Role":
+            case "ADD_ROLE":
                 addRole();
             break;
-            case "View All Departments":
+            case "VIEW_ALL_DEPTS":
                 viewAllDepartments();
             break;
-            case "Add Department":
+            case "ADD_DEPT":
                 addDepartment();
             break;
             default:
@@ -91,7 +91,7 @@ const viewAllEmployee = () => {
 
 const viewAllDepartments = () =>{
 
-    db.promise().query( `SELECT department.id, deprtment.name 
+    db.promise().query( `SELECT department.id, department.name AS department 
     FROM department`).then((result) => {
         console.table(result[0]);   
          menu()
@@ -102,7 +102,9 @@ const viewAllDepartments = () =>{
 
 const viewAllRoles =()=>{
       
-      db.promise().query( `SELECT * FROM role` ). then((result) => {
+      db.promise().query( `SELECT role.id,role.title, role.salary, department.name AS department FROM role
+      INNER JOIN department on role.department_id = department.id` ).then((result) => {
+        console.log(result);
         console.table(result[0]);   
          menu()
       }).catch( (err) => {
@@ -153,7 +155,7 @@ const addEmployee = async () => {
             }
     
                 if(insert) menu();
-                console.table(result); 
+                console.table(result[0]); 
         }
 
 
@@ -163,9 +165,65 @@ const addEmployee = async () => {
             }
      }
     
-    const updateEmployee =()=>{
+    const updateEmployee =()=>
        
-    }
+//         const data =       `SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id"
+//                     FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id`;
+//     db.promise().query(data, (error, response) => {
+//       if (error) throw error;
+//       let employeeNamesArray = [];
+//       response.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
+
+//       const data = `SELECT role.id, role.title FROM role`;
+//       db.promise().query(data, (error, response) => {
+//         if (error) throw error;
+//         let rolesArray = [];
+//         response.forEach((role) => {rolesArray.push(role.title);});
+//  inquirer.prompt([
+//                 {
+//                     name:"emName",
+//                     message: "Which employee's role you want to update?",
+//                     type: "input",
+//                 },
+//                 {
+//                     name:"roleEm",
+//                     message: "Which role do you want to assign the selected employee?",
+//                     type: "input",
+//                 }
+//             ])
+//             .then((answer) => {
+//               let newTitleId, employeeId;
+  
+//               response.forEach((role) => {
+//                 if (answer.chosenRole === role.title) {
+//                   newTitleId = role.id;
+//                 }
+//               });
+  
+//               response.forEach((employee) => {
+//                 if (
+//                   answer.chosenEmployee ===
+//                   `${employee.first_name} ${employee.last_name}`
+//                 ) {
+//                   employeeId = employee.id;
+//                 }
+//               }); 
+//               let sqls =    `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
+//               connection.query(
+//                 sqls,
+//                 [newTitleId, employeeId],
+//                 (error) => {
+//                   if (error) throw error;
+
+//         // db.promise().query(`SELECT  employee.id, employee.first_name, employee.last_name, role.id AS "role_id" FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id`).
+//         // then((result) => {
+//             console.table(result[0]);
+//             menu
+//         // }).catch((err) => {
+//         //     throw err;
+//         // });
+       
+//     };
     
     const addRole = async () => {
         try {
@@ -207,7 +265,7 @@ const addEmployee = async () => {
             }
     
                 if(insert) menu();
-                console.table(result); 
+                console.table(result[0]); 
         }
 
 
@@ -245,7 +303,7 @@ const addEmployee = async () => {
             }
     
                 if(insert) menu();
-                console.table(result); 
+                console.table(result[0]); 
         }
 
 
