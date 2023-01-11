@@ -68,7 +68,7 @@ function menu(){
                 addDepartment();
             break;
             default:
-                
+               process.exit() 
             console.log("No value found");
         }
     })
@@ -165,65 +165,57 @@ const addEmployee = async () => {
             }
      }
     
-    const updateEmployee =()=>
+    const updateEmployee =()=> {
        
-//         const data =       `SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id"
-//                     FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id`;
-//     db.promise().query(data, (error, response) => {
-//       if (error) throw error;
-//       let employeeNamesArray = [];
-//       response.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
+        const data =       `SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id"
+                    FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id`;
+    db.promise().query(data).then((response,error) => {
+      if (error){
+        console.log(error)
+        throw error;
+      }
+    
+      let employeeNamesArray = [];
+      response[0].forEach((employee) => {employeeNamesArray.push({name:`${employee.first_name} ${employee.last_name}`, value: employee.id});});
 
-//       const data = `SELECT role.id, role.title FROM role`;
-//       db.promise().query(data, (error, response) => {
-//         if (error) throw error;
-//         let rolesArray = [];
-//         response.forEach((role) => {rolesArray.push(role.title);});
-//  inquirer.prompt([
-//                 {
-//                     name:"emName",
-//                     message: "Which employee's role you want to update?",
-//                     type: "input",
-//                 },
-//                 {
-//                     name:"roleEm",
-//                     message: "Which role do you want to assign the selected employee?",
-//                     type: "input",
-//                 }
-//             ])
-//             .then((answer) => {
-//               let newTitleId, employeeId;
+      const roleData = `SELECT role.id, role.title FROM role`;
+      db.promise().query(roleData).then((response,error) => {
+        if (error) throw error;
+        let rolesArray = [];
+        response[0].forEach((role) => {rolesArray.push({name:role.title, value:role.id});});
+ inquirer.prompt([
+    
+                {
+                    name:"emName",
+                    message: "Which employee's role you want to update?",
+                    type: "list",
+                    choices: employeeNamesArray
+                },
+                {
+                    name:"roleEm",
+                    message: "Which role do you want to assign the selected employee?",
+                    type: "list",
+                    choices: rolesArray
+                }
+            ])
+            .then((answer) => {
+              let newTitleId, employeeId;
+              newTitleId=answer.roleEm
+              employeeId=answer.emName
   
-//               response.forEach((role) => {
-//                 if (answer.chosenRole === role.title) {
-//                   newTitleId = role.id;
-//                 }
-//               });
-  
-//               response.forEach((employee) => {
-//                 if (
-//                   answer.chosenEmployee ===
-//                   `${employee.first_name} ${employee.last_name}`
-//                 ) {
-//                   employeeId = employee.id;
-//                 }
-//               }); 
-//               let sqls =    `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
-//               connection.query(
-//                 sqls,
-//                 [newTitleId, employeeId],
-//                 (error) => {
-//                   if (error) throw error;
+      
+              let sqls =    `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
+             let result = db.query(
+                sqls,
+                [newTitleId, employeeId])
+            console.table(result[0]);
+            menu()
+    
+                })
+            })
+    });
+}
 
-//         // db.promise().query(`SELECT  employee.id, employee.first_name, employee.last_name, role.id AS "role_id" FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id`).
-//         // then((result) => {
-//             console.table(result[0]);
-//             menu
-//         // }).catch((err) => {
-//         //     throw err;
-//         // });
-       
-//     };
     
     const addRole = async () => {
         try {
