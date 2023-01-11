@@ -246,7 +246,7 @@ const addEmployee = async () => {
 
         if (response) {
             console.log('add role prompts', response)
-            const insert = await db.promise().query(`INSERT INTO role ( title, salary, department_id) VALUES(?,?,?)`,[ response.roleName , response.roleSalary, response.roleDepartment,]);
+            const insert = await db.promise().query(`INSERT INTO role ( title, salary) VALUES(?,?)`,[ response.roleName , response.roleSalary, response.roleDepartment,]);
 
             console.log(insert);
 
@@ -257,7 +257,7 @@ const addEmployee = async () => {
             }
     
                 if(insert) menu();
-                console.table(result[0]); 
+                console.table(result); 
         }
 
 
